@@ -268,6 +268,14 @@ namespace SRTPluginProviderRE8
                         pointerPropsManager = 0x0A18D990 + 0x1000;
                         return true;
                     }
+                case GameVersion.RE8_UNK_20210710_1:
+                    {
+                        pointerRankManager = 0x0A1A50C0;
+                        pointerInventory = 0x0A1B29F0;
+                        pointerAddressEnemies = 0x0A1B1D00;
+                        pointerPropsManager = 0x0A18D990;
+                        return true;
+                    }
             }
 
             // If we made it this far... rest in pepperonis. We have failed to detect any of the correct versions we support and have no idea what pointer addresses to use. Bail out.
