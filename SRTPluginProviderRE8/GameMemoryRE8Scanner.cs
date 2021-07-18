@@ -269,6 +269,7 @@ namespace SRTPluginProviderRE8
                         return true;
                     }
                 case GameVersion.RE8_UNK_20210710_1:
+                case GameVersion.RE8_UNK_20210714_1:
                     {
                         pointerRankManager = 0x0A1A50C0;
                         pointerInventory = 0x0A1B29F0;
