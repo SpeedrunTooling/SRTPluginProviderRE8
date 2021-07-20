@@ -236,6 +236,30 @@ namespace SRTPluginProviderRE8
         {
             switch (version)
             {
+                case GameVersion.RE8_WW_20210719_2:
+                    {
+                        pointerRankManager = 0x0A05CFF8;
+                        pointerInventory = 0x0A06A5B8;
+                        pointerAddressEnemies = 0x0A0698B0;
+                        pointerPropsManager = 0x0A042F88;
+                        return true;
+                    }
+                case GameVersion.RE8_CEROD_20210719_2:
+                    {
+                        pointerRankManager = 0x0A05CFF8 + 0x2000;
+                        pointerInventory = 0x0A06A5B8 + 0x2000;
+                        pointerAddressEnemies = 0x0A0698B0 + 0x2000;
+                        pointerPropsManager = 0x0A042F88 + 0x2000;
+                        return true;
+                    }
+                case GameVersion.RE8_CEROZ_20210719_2:
+                    {
+                        pointerRankManager = 0x0A05CFF8 + 0x1000;
+                        pointerInventory = 0x0A06A5B8 + 0x1000;
+                        pointerAddressEnemies = 0x0A0698B0 + 0x1000;
+                        pointerPropsManager = 0x0A042F88 + 0x1000;
+                        return true;
+                    }
                 case GameVersion.RE8_PROMO_01_20210426_1:
                     {
                         pointerRankManager = 0x0A1A50C0 + 0x1030;
@@ -245,6 +269,8 @@ namespace SRTPluginProviderRE8
                         return true;
                     }
                 case GameVersion.RE8_WW_20210506_1:
+                case GameVersion.RE8_UNK_20210710_1:
+                case GameVersion.RE8_UNK_20210714_1:
                     {
                         pointerRankManager = 0x0A1A50C0;
                         pointerInventory = 0x0A1B29F0;
@@ -266,15 +292,6 @@ namespace SRTPluginProviderRE8
                         pointerInventory = 0x0A1B1C70 + 0x1000;
                         pointerAddressEnemies = 0x0A1B1D00 + 0x1000;
                         pointerPropsManager = 0x0A18D990 + 0x1000;
-                        return true;
-                    }
-                case GameVersion.RE8_UNK_20210710_1:
-                case GameVersion.RE8_UNK_20210714_1:
-                    {
-                        pointerRankManager = 0x0A1A50C0;
-                        pointerInventory = 0x0A1B29F0;
-                        pointerAddressEnemies = 0x0A1B1D00;
-                        pointerPropsManager = 0x0A18D990;
                         return true;
                     }
             }
