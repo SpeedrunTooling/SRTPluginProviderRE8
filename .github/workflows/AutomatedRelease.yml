@@ -29,6 +29,10 @@ jobs:
       with:
         fetch-depth: 0
     
+    # Create repo user folder for the dependencies
+    - name: Create repo user folder
+      run: New-Item -ItemType directory -Path ..\..\Squirrelies
+    
     # Checkout latest dependencies code
     - name: Checkout SRTHost
       uses: actions/checkout@v2
@@ -37,12 +41,9 @@ jobs:
         path: SRTHost
         repository: Squirrelies/SRTHost
 
-    - name: PWD Test
-      run: Write-Host $pwd.Path
-
     # GITHUB_WORKSPACE pathing is ass. Move this directory down one level.
     - name: Move SRTHost down a folder to work with existing csproj pathing
-      run: Move-Item -Path SRTHost -Destination ..
+      run: Move-Item -Path SRTHost -Destination ..\..\Squirrelies
 
     # Checkout latest dependencies code
     - name: Checkout ProcessMemory
@@ -54,7 +55,7 @@ jobs:
 
     # GITHUB_WORKSPACE pathing is ass. Move this directory down one level.
     - name: Move ProcessMemory down a folder to work with existing csproj pathing
-      run: Move-Item -Path ProcessMemory -Destination ..
+      run: Move-Item -Path ProcessMemory -Destination ..\..\Squirrelies
 
     # Set some output variables
     - name: Set the main environment variables based on other environment variables
