@@ -22,7 +22,7 @@ jobs:
       zip-filename: ${{steps.generated-variables-2.outputs.zip-filename}}
       version: ${{steps.get_version.outputs.RELEASE_VERSION}}
 
-    steps:        
+    steps:
     # Checkout latest code
     - name: Checkout
       uses: actions/checkout@v2
@@ -36,6 +36,9 @@ jobs:
         fetch-depth: 0
         path: SRTHost
         repository: Squirrelies/SRTHost
+
+    - name: PWD Test
+      run: Write-Host $pwd.Path
 
     # GITHUB_WORKSPACE pathing is ass. Move this directory down one level.
     - name: Move SRTHost down a folder to work with existing csproj pathing
