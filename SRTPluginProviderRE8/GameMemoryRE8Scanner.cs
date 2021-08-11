@@ -236,6 +236,30 @@ namespace SRTPluginProviderRE8
         {
             switch (version)
             {
+                case GameVersion.RE8_WW_20210810_3:
+                    {
+                        pointerInventory = 0x0A06B7F0; // app_InventoryManager
+                        pointerPropsManager = 0x0A06B900; // app_PropsManager
+                        pointerRankManager = 0x0A06B920; // app_RankManager
+                        pointerAddressEnemies = 0x0A06B880; // app_MoveManager
+                        return true;
+                    }
+                case GameVersion.RE8_CEROD_20210810_3:
+                    {
+                        pointerInventory = 0x0A06B7F0 + 0x2000;
+                        pointerPropsManager = 0x0A06B900 + 0x2000;
+                        pointerRankManager = 0x0A06B920 + 0x2000;
+                        pointerAddressEnemies = 0x0A06B880 + 0x2000;
+                        return true;
+                    }
+                case GameVersion.RE8_CEROZ_20210810_3:
+                    {
+                        pointerInventory = 0x0A06B7F0 + 0x1000;
+                        pointerPropsManager = 0x0A06B900 + 0x1000;
+                        pointerRankManager = 0x0A06B920 + 0x1000;
+                        pointerAddressEnemies = 0x0A06B880 + 0x1000;
+                        return true;
+                    }
                 case GameVersion.RE8_WW_20210719_2:
                     {
                         pointerRankManager = 0x0A05CFF8;
