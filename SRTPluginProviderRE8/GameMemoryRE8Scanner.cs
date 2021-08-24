@@ -19,8 +19,6 @@ namespace SRTPluginProviderRE8
         public bool HasScanned;
         public bool ProcessRunning => memoryAccess != null && memoryAccess.ProcessRunning;
         public int ProcessExitCode => (memoryAccess != null) ? memoryAccess.ProcessExitCode : 0;
-        private int EnemyTableCount;
-        private int InventoryTableCount;
 
         // Pointer Address Variables
         private int pointerPropsManager;
@@ -237,6 +235,7 @@ namespace SRTPluginProviderRE8
             switch (version)
             {
                 case GameVersion.RE8_WW_20210810_3:
+                case GameVersion.RE8_WW_20210824_4:
                     {
                         pointerInventory = 0x0A06B7F0; // app_InventoryManager
                         pointerPropsManager = 0x0A06B900; // app_PropsManager
@@ -330,7 +329,7 @@ namespace SRTPluginProviderRE8
         private unsafe void GenerateEnemyEntries()
         {
             bool success;
-            fixed (int* p = &EnemyTableCount)
+            fixed (int* p = &gameMemoryValues._enemyTableCount)
                 success = PointerEnemyEntryList.TryDerefInt(0x1C, p);
 
             PointerEnemyEntries = new MultilevelPointer[MAX_ENTITIES]; // Create a new enemy pointer table array with the detected size.
@@ -353,7 +352,7 @@ namespace SRTPluginProviderRE8
         private unsafe void GenerateItemEntries()
         {
             bool success;
-            fixed (int* p = &InventoryTableCount)
+            fixed (int* p = &gameMemoryValues._playerInventoryCount)
                 success = PointerInventoryEntryList.TryDerefInt(0x1C, p);
 
             PointerInventoryEntries = new MultilevelPointer[MAX_ITEMS];
@@ -417,7 +416,7 @@ namespace SRTPluginProviderRE8
                 try
                 {
                     // Check to see if the pointer is currently valid. It can become invalid when rooms are changed.
-                    if (PointerEnemyEntries[i].Address != IntPtr.Zero && i < EnemyTableCount && SafeReadByteArray(PointerEnemyEntries[i].Address, sizeof(GamePlayerHP), out byte[] enemyHpBytes))
+                    if (PointerEnemyEntries[i].Address != IntPtr.Zero && i < gameMemoryValues.EnemyTableCount && SafeReadByteArray(PointerEnemyEntries[i].Address, sizeof(GamePlayerHP), out byte[] enemyHpBytes))
                     {
                         // Note, this is using the same structure as the player HP.
                         // This may not always be the case, but the structures match for now.
@@ -449,7 +448,7 @@ namespace SRTPluginProviderRE8
                 try
                 {
                     // Check to see if the pointer is currently valid. It can become invalid when rooms are changed.
-                    if (PointerInventoryEntries[i].Address != IntPtr.Zero && i < InventoryTableCount && SafeReadByteArray(PointerInventoryEntries[i].Address, sizeof(GameInventoryItem), out byte[] inventoryItemBytes))
+                    if (PointerInventoryEntries[i].Address != IntPtr.Zero && i < gameMemoryValues.PlayerInventoryCount && SafeReadByteArray(PointerInventoryEntries[i].Address, sizeof(GameInventoryItem), out byte[] inventoryItemBytes))
                     {
                         var inventoryItem = GameInventoryItem.AsStruct(inventoryItemBytes);
 
