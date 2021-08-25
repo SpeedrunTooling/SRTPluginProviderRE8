@@ -15,9 +15,11 @@ namespace SRTPluginProviderRE8
         int RankScore { get; set; }
         int Rank { get; set; }
         int Lei { get; set; }
+        int PlayerInventoryCount { get; set; }
         InventoryEntry[] PlayerInventory { get; set; }
+        int EnemyTableCount { get; set; }
         EnemyHP[] EnemyHealth { get; set; }
         InventoryEntry LastKeyItem { get; set; }
-
+        
     }
 }

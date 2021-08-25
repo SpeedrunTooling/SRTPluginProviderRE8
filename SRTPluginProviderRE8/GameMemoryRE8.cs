@@ -32,8 +32,14 @@ namespace SRTPluginProviderRE8
         public int Lei { get => _lei; set => _lei = value; }
         internal int _lei;
 
+        public int EnemyTableCount { get => _enemyTableCount; set => _enemyTableCount = value; }
+        internal int _enemyTableCount;
+
         public EnemyHP[] EnemyHealth { get => _enemyHealth; set => _enemyHealth = value; }
         internal EnemyHP[] _enemyHealth;
+
+        public int PlayerInventoryCount { get => _playerInventoryCount; set => _playerInventoryCount = value; }
+        internal int _playerInventoryCount;
 
         public InventoryEntry LastKeyItem { get => _lastKeyItem; set => _lastKeyItem = value; }
         internal InventoryEntry _lastKeyItem;

@@ -32,7 +32,7 @@ namespace SRTPluginProviderRE8.Structs
                 else if (IsMap)
                     return string.Format("Map {0}", (CraftableEnumeration)ItemID);
                 else if (ItemID > 0)
-                    return string.Format("Uknown Item 0x{0}", ItemID.ToString("X4"));
+                    return string.Format("Unknown Item 0x{0}", ItemID.ToString("X4"));
                 else
                     return string.Format("Empty Slot");
             }
