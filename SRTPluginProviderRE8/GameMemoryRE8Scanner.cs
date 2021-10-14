@@ -236,6 +236,7 @@ namespace SRTPluginProviderRE8
             {
                 case GameVersion.RE8_WW_20210810_3:
                 case GameVersion.RE8_WW_20210824_4:
+                case GameVersion.RE8_WW_20211012_5:
                     {
                         pointerInventory = 0x0A06B7F0; // app_InventoryManager
                         pointerPropsManager = 0x0A06B900; // app_PropsManager
