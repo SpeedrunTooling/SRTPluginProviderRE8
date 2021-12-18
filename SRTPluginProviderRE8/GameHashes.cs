@@ -40,6 +40,9 @@ namespace SRTPluginProviderRE8
         // PATCH 1.04
         private static readonly byte[] re8WW_20211012_5 = new byte[32] { 0xB2, 0x20, 0x23, 0xD3, 0x51, 0x04, 0x4C, 0xDA, 0x36, 0x99, 0x31, 0x55, 0xED, 0x18, 0x0F, 0xB9, 0x1F, 0x8C, 0x32, 0xAE, 0xC4, 0x93, 0xC9, 0x9B, 0xC6, 0x09, 0x20, 0x42, 0x8A, 0x90, 0x97, 0x85 };
         
+        // "PATCH 1.05"
+        private static readonly byte[] re8WW_20211217_1 = new byte[32] { 0xCA, 0x49, 0x7E, 0x08, 0x4A, 0xE3, 0x20, 0xBC, 0xC7, 0x0C, 0xE2, 0xF0, 0x9E, 0x6D, 0xDA, 0x03, 0x24, 0x29, 0x43, 0x27, 0x7C, 0xD3, 0x43, 0xA0, 0x86, 0x10, 0xFD, 0x52, 0x61, 0xD3, 0xB2, 0x7D };
+
         public static GameVersion DetectVersion(string filePath)
         {
             byte[] checksum;
@@ -70,11 +73,17 @@ namespace SRTPluginProviderRE8
                 Console.WriteLine("Steam v1.03 Detected.");
                 return GameVersion.RE8_WW_20210824_4;
             }
-            
+
             else if (checksum.SequenceEqual(re8WW_20211012_5))
             {
                 Console.WriteLine("Steam v1.04 Detected.");
                 return GameVersion.RE8_WW_20211012_5;
+            }
+
+            else if (checksum.SequenceEqual(re8WW_20211217_1))
+            {
+                Console.WriteLine("Steam v1.05 Detected.");
+                return GameVersion.RE8_WW_20211217_1;
             }
 
             else if (checksum.SequenceEqual(re8promo01_20210426_1))
