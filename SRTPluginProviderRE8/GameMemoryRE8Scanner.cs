@@ -234,6 +234,15 @@ namespace SRTPluginProviderRE8
         {
             switch (version)
             {
+                case GameVersion.RE8_WW_20211217_1:
+                    {
+                        pointerInventory = 0x0A06B7F0 + 0x10F0; // app_InventoryManager
+                        pointerPropsManager = 0x0A06B900 + 0x10F0; // app_PropsManager
+                        pointerRankManager = 0x0A06B920 + 0x10F0; // app_RankManager
+                        pointerAddressEnemies = 0x0A06B880 + 0x10F0; // app_MoveManager
+                        return true;
+                    }
+
                 case GameVersion.RE8_WW_20210810_3:
                 case GameVersion.RE8_WW_20210824_4:
                 case GameVersion.RE8_WW_20211012_5:
