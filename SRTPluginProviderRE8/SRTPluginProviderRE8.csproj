@@ -41,7 +41,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Squirrelies\ProcessMemory\ProcessMemory\ProcessMemory.csproj" />
-    <ProjectReference Include="..\..\..\Squirrelies\SRTHost\SRTPluginBase\SRTPluginBase.csproj">
+    <ProjectReference Include="..\..\..\SpeedRunTool\SRTHost\SRTPluginBase\SRTPluginBase.csproj">
       <Private>false</Private>
       <ExcludeAssets>runtime</ExcludeAssets>
     </ProjectReference>
