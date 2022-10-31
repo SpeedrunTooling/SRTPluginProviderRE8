@@ -146,12 +146,11 @@ namespace SRTPluginProviderRE8
             {
                 BaseAddress = NativeWrappers.GetProcessBaseAddress(pid, PInvoke.ListModules.LIST_MODULES_64BIT); // Bypass .NET's managed solution for getting this and attempt to get this info ourselves via PInvoke since some users are getting 299 PARTIAL COPY when they seemingly shouldn't.
 
-                if (!SelectPointerAddresses(GameHashes.DetectVersion(process.MainModule.FileName), pid))
-                    return; // Unknown version.
+                SelectPointerAddresses(GameHashes.DetectVersion(process.MainModule.FileName), pid);
             }
         }
 
-        private bool SelectPointerAddresses(GameVersion version, int pid)
+        private void SelectPointerAddresses(GameVersion version, int pid)
         {
             if (version >= GameVersion.RE8_WW_20221014_1)
             {
@@ -163,7 +162,7 @@ namespace SRTPluginProviderRE8
                             pointerPropsManager = 0x0C9C4960; // app_PropsManager *
                             pointerRankManager = 0x0C9B7958; // app_RankManager *
                             pointerAddressEnemies = 0x0C9FC1C0; // app_MoveManager *
-                            return true;
+                            break;
                         }
                 }
 
@@ -255,7 +254,7 @@ namespace SRTPluginProviderRE8
                             pointerPropsManager = 0x0A06B900 + 0x10F0; // app_PropsManager
                             pointerRankManager = 0x0A06B920 + 0x10F0; // app_RankManager
                             pointerAddressEnemies = 0x0A06B880 + 0x10F0; // app_MoveManager
-                            return true;
+                            break;
                         }
 
                     case GameVersion.RE8_WW_20210810_3:
@@ -266,7 +265,7 @@ namespace SRTPluginProviderRE8
                             pointerPropsManager = 0x0A06B900; // app_PropsManager
                             pointerRankManager = 0x0A06B920; // app_RankManager
                             pointerAddressEnemies = 0x0A06B880; // app_MoveManager
-                            return true;
+                            break;
                         }
                     case GameVersion.RE8_CEROD_20210810_3:
                         {
@@ -274,7 +273,7 @@ namespace SRTPluginProviderRE8
                             pointerPropsManager = 0x0A06B900 + 0x2000;
                             pointerRankManager = 0x0A06B920 + 0x2000;
                             pointerAddressEnemies = 0x0A06B880 + 0x2000;
-                            return true;
+                            break;
                         }
                     case GameVersion.RE8_CEROZ_20210810_3:
                         {
@@ -282,7 +281,7 @@ namespace SRTPluginProviderRE8
                             pointerPropsManager = 0x0A06B900 + 0x1000;
                             pointerRankManager = 0x0A06B920 + 0x1000;
                             pointerAddressEnemies = 0x0A06B880 + 0x1000;
-                            return true;
+                            break;
                         }
                     case GameVersion.RE8_WW_20210719_2:
                         {
@@ -290,7 +289,7 @@ namespace SRTPluginProviderRE8
                             pointerInventory = 0x0A06A5B8;
                             pointerAddressEnemies = 0x0A0698B0;
                             pointerPropsManager = 0x0A042F88;
-                            return true;
+                            break;
                         }
                     case GameVersion.RE8_CEROD_20210719_2:
                         {
@@ -298,7 +297,7 @@ namespace SRTPluginProviderRE8
                             pointerInventory = 0x0A06A5B8 + 0x2000;
                             pointerAddressEnemies = 0x0A0698B0 + 0x2000;
                             pointerPropsManager = 0x0A042F88 + 0x2000;
-                            return true;
+                            break;
                         }
                     case GameVersion.RE8_CEROZ_20210719_2:
                         {
@@ -306,7 +305,7 @@ namespace SRTPluginProviderRE8
                             pointerInventory = 0x0A06A5B8 + 0x1000;
                             pointerAddressEnemies = 0x0A0698B0 + 0x1000;
                             pointerPropsManager = 0x0A042F88 + 0x1000;
-                            return true;
+                            break;
                         }
                     case GameVersion.RE8_PROMO_01_20210426_1:
                         {
@@ -314,7 +313,7 @@ namespace SRTPluginProviderRE8
                             pointerInventory = 0x0A1B29F0 + 0x1030;
                             pointerAddressEnemies = 0x0A1B1D00 + 0x1030;
                             pointerPropsManager = 0x0A18D990 + 0x1030;
-                            return true;
+                            break;
                         }
                     case GameVersion.RE8_WW_20210506_1:
                     case GameVersion.RE8_UNK_20210710_1:
@@ -324,7 +323,7 @@ namespace SRTPluginProviderRE8
                             pointerInventory = 0x0A1B29F0;
                             pointerAddressEnemies = 0x0A1B1D00;
                             pointerPropsManager = 0x0A18D990;
-                            return true;
+                            break;
                         }
                     case GameVersion.RE8_CEROD_20210506_1:
                         {
@@ -332,7 +331,7 @@ namespace SRTPluginProviderRE8
                             pointerInventory = 0x0A1B29F0 + 0x2000;
                             pointerAddressEnemies = 0x0A1B1D00 + 0x2000;
                             pointerPropsManager = 0x0A18D990 + 0x2000;
-                            return true;
+                            break;
                         }
                     case GameVersion.RE8_CEROZ_20210508_1:
                         {
@@ -340,7 +339,7 @@ namespace SRTPluginProviderRE8
                             pointerInventory = 0x0A1B1C70 + 0x1000;
                             pointerAddressEnemies = 0x0A1B1D00 + 0x1000;
                             pointerPropsManager = 0x0A18D990 + 0x1000;
-                            return true;
+                            break;
                         }
                 }
 
@@ -421,9 +420,6 @@ namespace SRTPluginProviderRE8
 
                 GenerateItemEntries();
             }
-
-            // If we made it this far... rest in pepperonis. We have failed to detect any of the correct versions we support and have no idea what pointer addresses to use. Bail out.
-            return false;
         }
 
         /// <summary>
