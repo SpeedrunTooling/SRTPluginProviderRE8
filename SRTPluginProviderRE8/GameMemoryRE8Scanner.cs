@@ -16,6 +16,7 @@ namespace SRTPluginProviderRE8
         // Variables
         private ProcessMemoryHandler memoryAccess;
         private GameMemoryRE8 gameMemoryValues;
+        private GameVersion gameVersion;
         public bool HasScanned;
         public bool ProcessRunning => memoryAccess != null && memoryAccess.ProcessRunning;
         public int ProcessExitCode => (memoryAccess != null) ? memoryAccess.ProcessExitCode : 0;
@@ -145,16 +146,16 @@ namespace SRTPluginProviderRE8
             if (ProcessRunning)
             {
                 BaseAddress = NativeWrappers.GetProcessBaseAddress(pid, PInvoke.ListModules.LIST_MODULES_64BIT); // Bypass .NET's managed solution for getting this and attempt to get this info ourselves via PInvoke since some users are getting 299 PARTIAL COPY when they seemingly shouldn't.
-
-                SelectPointerAddresses(GameHashes.DetectVersion(process.MainModule.FileName), pid);
+                gameVersion = GameHashes.DetectVersion(process.MainModule.FileName);
+                SelectPointerAddresses(pid);
             }
         }
 
-        private void SelectPointerAddresses(GameVersion version, int pid)
+        private void SelectPointerAddresses(int pid)
         {
-            if (version >= GameVersion.RE8_WW_20221014_1)
+            if (gameVersion >= GameVersion.RE8_WW_20221014_1)
             {
-                switch (version)
+                switch (gameVersion)
                 {
                     case GameVersion.RE8_WW_20221014_1:
                         {
@@ -246,7 +247,7 @@ namespace SRTPluginProviderRE8
             }
             else
             {
-                switch (version)
+                switch (gameVersion)
                 {
                     case GameVersion.RE8_WW_20211217_1:
                         {
@@ -441,10 +442,21 @@ namespace SRTPluginProviderRE8
             IntPtr[] entityPtrArr = new IntPtr[MAX_ENTITIES];
             Buffer.BlockCopy(entityPtrByteArr, 0, entityPtrArr, 0, entityPtrByteArr.Length);
 
-            // The pointers we read are already the address of the entity, so make sure we add the first offset here
-            for (int i = 0; i < PointerEnemyEntries.Length; ++i) // Loop through and create all of the pointers for the table.
+            if (gameVersion >= GameVersion.RE8_WW_20221014_1)
             {
-                PointerEnemyEntries[i] = new MultilevelPointer(memoryAccess, IntPtr.Add(entityPtrArr[i], 0x228), 0x18, 0x48, 0x48);
+                // The pointers we read are already the address of the entity, so make sure we add the first offset here
+                for (int i = 0; i < PointerEnemyEntries.Length; ++i) // Loop through and create all of the pointers for the table.
+                {
+                    PointerEnemyEntries[i] = new MultilevelPointer(memoryAccess, IntPtr.Add(entityPtrArr[i], 0xF8), 0x68, 0x48);
+                }
+            }
+            else
+            {
+                // The pointers we read are already the address of the entity, so make sure we add the first offset here
+                for (int i = 0; i < PointerEnemyEntries.Length; ++i) // Loop through and create all of the pointers for the table.
+                {
+                    PointerEnemyEntries[i] = new MultilevelPointer(memoryAccess, IntPtr.Add(entityPtrArr[i], 0x228), 0x18, 0x48, 0x48);
+                }
             }
         }
 
