@@ -159,7 +159,7 @@ namespace SRTPluginProviderRE8
                 {
                     case GameVersion.RE8_WW_20221014_1:
                         {
-                            pointerInventory = 0x0A06B7F0 + 0x10F0; // app_InventoryManager
+                            pointerInventory = 0x0C9B7810; // app_InventoryManager *
                             pointerPropsManager = 0x0C9C4960; // app_PropsManager *
                             pointerRankManager = 0x0C9B7958; // app_RankManager *
                             pointerAddressEnemies = 0x0C9FC1C0; // app_MoveManager *
@@ -168,8 +168,6 @@ namespace SRTPluginProviderRE8
                 }
 
                 // Setup the pointers.
-                //PointerPlayerHP = new MultilevelPointer(memoryAccess, IntPtr.Add(BaseAddress, pointerAddressHP), 0x58L, 0x18L, 0x18L, 0x78L, 0x68L, 0x48L);
-
                 PointerPlayerStatus = new MultilevelPointer(
                     memoryAccess,
                     IntPtr.Add(BaseAddress, pointerPropsManager),
@@ -218,8 +216,7 @@ namespace SRTPluginProviderRE8
                     memoryAccess,
                     IntPtr.Add(BaseAddress, pointerInventory),
                     0x60,
-                    0x18,
-                    0x10
+                    0x70
                 );
 
                 PointerEnemyEntryList = new MultilevelPointer(
@@ -348,8 +345,6 @@ namespace SRTPluginProviderRE8
                 }
 
                 // Setup the pointers.
-                //PointerPlayerHP = new MultilevelPointer(memoryAccess, IntPtr.Add(BaseAddress, pointerAddressHP), 0x58L, 0x18L, 0x18L, 0x78L, 0x68L, 0x48L);
-
                 PointerPlayerStatus = new MultilevelPointer(
                     memoryAccess,
                     IntPtr.Add(BaseAddress, pointerPropsManager),
