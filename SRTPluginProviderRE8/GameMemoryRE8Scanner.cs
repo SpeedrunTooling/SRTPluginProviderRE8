@@ -16,6 +16,7 @@ namespace SRTPluginProviderRE8
         // Variables
         private ProcessMemoryHandler memoryAccess;
         private GameMemoryRE8 gameMemoryValues;
+        private GameVersion gameVersion;
         public bool HasScanned;
         public bool ProcessRunning => memoryAccess != null && memoryAccess.ProcessRunning;
         public int ProcessExitCode => (memoryAccess != null) ? memoryAccess.ProcessExitCode : 0;
@@ -140,21 +141,36 @@ namespace SRTPluginProviderRE8
             if (process == null)
                 return; // Do not continue if this is null.
 
-            if (!SelectPointerAddresses(GameHashes.DetectVersion(process.MainModule.FileName)))
-                return; // Unknown version.
-
             int pid = GetProcessId(process).Value;
             memoryAccess = new ProcessMemoryHandler(pid);
             if (ProcessRunning)
             {
                 BaseAddress = NativeWrappers.GetProcessBaseAddress(pid, PInvoke.ListModules.LIST_MODULES_64BIT); // Bypass .NET's managed solution for getting this and attempt to get this info ourselves via PInvoke since some users are getting 299 PARTIAL COPY when they seemingly shouldn't.
+                gameVersion = GameHashes.DetectVersion(process.MainModule.FileName);
+                SelectPointerAddresses(pid);
+            }
+        }
+
+        private void SelectPointerAddresses(int pid)
+        {
+            if (gameVersion >= GameVersion.RE8_WW_20221014_1)
+            {
+                switch (gameVersion)
+                {
+                    case GameVersion.RE8_WW_20221014_1:
+                        {
+                            pointerInventory = 0x0C9B7810; // app_InventoryManager *
+                            pointerPropsManager = 0x0C9C4960; // app_PropsManager *
+                            pointerRankManager = 0x0C9B7958; // app_RankManager *
+                            pointerAddressEnemies = 0x0C9FC1C0; // app_MoveManager *
+                            break;
+                        }
+                }
 
                 // Setup the pointers.
-                //PointerPlayerHP = new MultilevelPointer(memoryAccess, IntPtr.Add(BaseAddress, pointerAddressHP), 0x58L, 0x18L, 0x18L, 0x78L, 0x68L, 0x48L);
-
                 PointerPlayerStatus = new MultilevelPointer(
-                    memoryAccess, 
-                    IntPtr.Add(BaseAddress, pointerPropsManager), 
+                    memoryAccess,
+                    IntPtr.Add(BaseAddress, pointerPropsManager),
                     0x58,
                     0x18,
                     0x18,
@@ -162,7 +178,184 @@ namespace SRTPluginProviderRE8
                 );
 
                 PointerPlayerHP = new MultilevelPointer(
-                    memoryAccess, 
+                    memoryAccess,
+                    IntPtr.Add(BaseAddress, pointerPropsManager),
+                    0x58,
+                    0x18,
+                    0x18,
+                    0x68,
+                    0xC8,
+                    0x68,
+                    0x48
+                );
+
+                PointerPlayerPosition = new MultilevelPointer(
+                    memoryAccess,
+                    IntPtr.Add(BaseAddress, pointerPropsManager),
+                    0x58,
+                    0x18,
+                    0x18,
+                    0x68,
+                    0xC8,
+                    0x78,
+                    0x50
+                );
+
+                PointerRankManager = new MultilevelPointer(
+                    memoryAccess,
+                    IntPtr.Add(BaseAddress, pointerRankManager)
+                );
+
+                PointerActiveInventory = new MultilevelPointer(
+                    memoryAccess,
+                    IntPtr.Add(BaseAddress, pointerInventory),
+                    0x60
+                );
+
+                PointerInventoryEntryList = new MultilevelPointer(
+                    memoryAccess,
+                    IntPtr.Add(BaseAddress, pointerInventory),
+                    0x60,
+                    0x70
+                );
+
+                PointerEnemyEntryList = new MultilevelPointer(
+                    memoryAccess,
+                    IntPtr.Add(BaseAddress, pointerAddressEnemies),
+                    0x40,
+                    0x78,
+                    0x78,
+                    0x10
+                );
+
+                gameMemoryValues._lastKeyItem = new InventoryEntry();
+
+                gameMemoryValues._playerInventory = new InventoryEntry[MAX_ITEMS];
+                for (int i = 0; i < gameMemoryValues._playerInventory.Length; ++i)
+                {
+                    gameMemoryValues._playerInventory[i] = new InventoryEntry();
+                    gameMemoryValues._playerInventory[i].CustomParameter = new InventoryEntryCustomParams();
+                }
+
+                gameMemoryValues._enemyHealth = new EnemyHP[MAX_ENTITIES];
+                for (int i = 0; i < gameMemoryValues._enemyHealth.Length; ++i)
+                    gameMemoryValues._enemyHealth[i] = new EnemyHP();
+
+                GenerateEnemyEntries();
+
+                GenerateItemEntries();
+            }
+            else
+            {
+                switch (gameVersion)
+                {
+                    case GameVersion.RE8_WW_20211217_1:
+                        {
+                            pointerInventory = 0x0A06B7F0 + 0x10F0; // app_InventoryManager
+                            pointerPropsManager = 0x0A06B900 + 0x10F0; // app_PropsManager
+                            pointerRankManager = 0x0A06B920 + 0x10F0; // app_RankManager
+                            pointerAddressEnemies = 0x0A06B880 + 0x10F0; // app_MoveManager
+                            break;
+                        }
+
+                    case GameVersion.RE8_WW_20210810_3:
+                    case GameVersion.RE8_WW_20210824_4:
+                    case GameVersion.RE8_WW_20211012_5:
+                        {
+                            pointerInventory = 0x0A06B7F0; // app_InventoryManager
+                            pointerPropsManager = 0x0A06B900; // app_PropsManager
+                            pointerRankManager = 0x0A06B920; // app_RankManager
+                            pointerAddressEnemies = 0x0A06B880; // app_MoveManager
+                            break;
+                        }
+                    case GameVersion.RE8_CEROD_20210810_3:
+                        {
+                            pointerInventory = 0x0A06B7F0 + 0x2000;
+                            pointerPropsManager = 0x0A06B900 + 0x2000;
+                            pointerRankManager = 0x0A06B920 + 0x2000;
+                            pointerAddressEnemies = 0x0A06B880 + 0x2000;
+                            break;
+                        }
+                    case GameVersion.RE8_CEROZ_20210810_3:
+                        {
+                            pointerInventory = 0x0A06B7F0 + 0x1000;
+                            pointerPropsManager = 0x0A06B900 + 0x1000;
+                            pointerRankManager = 0x0A06B920 + 0x1000;
+                            pointerAddressEnemies = 0x0A06B880 + 0x1000;
+                            break;
+                        }
+                    case GameVersion.RE8_WW_20210719_2:
+                        {
+                            pointerRankManager = 0x0A05CFF8;
+                            pointerInventory = 0x0A06A5B8;
+                            pointerAddressEnemies = 0x0A0698B0;
+                            pointerPropsManager = 0x0A042F88;
+                            break;
+                        }
+                    case GameVersion.RE8_CEROD_20210719_2:
+                        {
+                            pointerRankManager = 0x0A05CFF8 + 0x2000;
+                            pointerInventory = 0x0A06A5B8 + 0x2000;
+                            pointerAddressEnemies = 0x0A0698B0 + 0x2000;
+                            pointerPropsManager = 0x0A042F88 + 0x2000;
+                            break;
+                        }
+                    case GameVersion.RE8_CEROZ_20210719_2:
+                        {
+                            pointerRankManager = 0x0A05CFF8 + 0x1000;
+                            pointerInventory = 0x0A06A5B8 + 0x1000;
+                            pointerAddressEnemies = 0x0A0698B0 + 0x1000;
+                            pointerPropsManager = 0x0A042F88 + 0x1000;
+                            break;
+                        }
+                    case GameVersion.RE8_PROMO_01_20210426_1:
+                        {
+                            pointerRankManager = 0x0A1A50C0 + 0x1030;
+                            pointerInventory = 0x0A1B29F0 + 0x1030;
+                            pointerAddressEnemies = 0x0A1B1D00 + 0x1030;
+                            pointerPropsManager = 0x0A18D990 + 0x1030;
+                            break;
+                        }
+                    case GameVersion.RE8_WW_20210506_1:
+                    case GameVersion.RE8_UNK_20210710_1:
+                    case GameVersion.RE8_UNK_20210714_1:
+                        {
+                            pointerRankManager = 0x0A1A50C0;
+                            pointerInventory = 0x0A1B29F0;
+                            pointerAddressEnemies = 0x0A1B1D00;
+                            pointerPropsManager = 0x0A18D990;
+                            break;
+                        }
+                    case GameVersion.RE8_CEROD_20210506_1:
+                        {
+                            pointerRankManager = 0x0A1A50C0 + 0x2000;
+                            pointerInventory = 0x0A1B29F0 + 0x2000;
+                            pointerAddressEnemies = 0x0A1B1D00 + 0x2000;
+                            pointerPropsManager = 0x0A18D990 + 0x2000;
+                            break;
+                        }
+                    case GameVersion.RE8_CEROZ_20210508_1:
+                        {
+                            pointerRankManager = 0x0A1A50C0 + 0x1000;
+                            pointerInventory = 0x0A1B1C70 + 0x1000;
+                            pointerAddressEnemies = 0x0A1B1D00 + 0x1000;
+                            pointerPropsManager = 0x0A18D990 + 0x1000;
+                            break;
+                        }
+                }
+
+                // Setup the pointers.
+                PointerPlayerStatus = new MultilevelPointer(
+                    memoryAccess,
+                    IntPtr.Add(BaseAddress, pointerPropsManager),
+                    0x58,
+                    0x18,
+                    0x18,
+                    0x68
+                );
+
+                PointerPlayerHP = new MultilevelPointer(
+                    memoryAccess,
                     IntPtr.Add(BaseAddress, pointerPropsManager),
                     0x58,
                     0x18,
@@ -174,7 +367,7 @@ namespace SRTPluginProviderRE8
                 );
 
                 PointerPlayerPosition = new MultilevelPointer(
-                    memoryAccess, 
+                    memoryAccess,
                     IntPtr.Add(BaseAddress, pointerPropsManager),
                     0x58,
                     0x18,
@@ -186,7 +379,7 @@ namespace SRTPluginProviderRE8
                 );
 
                 PointerRankManager = new MultilevelPointer(
-                    memoryAccess, 
+                    memoryAccess,
                     IntPtr.Add(BaseAddress, pointerRankManager)
                 );
 
@@ -197,16 +390,16 @@ namespace SRTPluginProviderRE8
                 );
 
                 PointerInventoryEntryList = new MultilevelPointer(
-                    memoryAccess, 
-                    IntPtr.Add(BaseAddress, pointerInventory), 
+                    memoryAccess,
+                    IntPtr.Add(BaseAddress, pointerInventory),
                     0x60,
                     0x18,
                     0x10
                 );
 
                 PointerEnemyEntryList = new MultilevelPointer(
-                    memoryAccess, 
-                    IntPtr.Add(BaseAddress, pointerAddressEnemies), 
+                    memoryAccess,
+                    IntPtr.Add(BaseAddress, pointerAddressEnemies),
                     0x58,
                     0x10
                 );
@@ -230,109 +423,6 @@ namespace SRTPluginProviderRE8
             }
         }
 
-        private bool SelectPointerAddresses(GameVersion version)
-        {
-            switch (version)
-            {
-                case GameVersion.RE8_WW_20211217_1:
-                    {
-                        pointerInventory = 0x0A06B7F0 + 0x10F0; // app_InventoryManager
-                        pointerPropsManager = 0x0A06B900 + 0x10F0; // app_PropsManager
-                        pointerRankManager = 0x0A06B920 + 0x10F0; // app_RankManager
-                        pointerAddressEnemies = 0x0A06B880 + 0x10F0; // app_MoveManager
-                        return true;
-                    }
-
-                case GameVersion.RE8_WW_20210810_3:
-                case GameVersion.RE8_WW_20210824_4:
-                case GameVersion.RE8_WW_20211012_5:
-                    {
-                        pointerInventory = 0x0A06B7F0; // app_InventoryManager
-                        pointerPropsManager = 0x0A06B900; // app_PropsManager
-                        pointerRankManager = 0x0A06B920; // app_RankManager
-                        pointerAddressEnemies = 0x0A06B880; // app_MoveManager
-                        return true;
-                    }
-                case GameVersion.RE8_CEROD_20210810_3:
-                    {
-                        pointerInventory = 0x0A06B7F0 + 0x2000;
-                        pointerPropsManager = 0x0A06B900 + 0x2000;
-                        pointerRankManager = 0x0A06B920 + 0x2000;
-                        pointerAddressEnemies = 0x0A06B880 + 0x2000;
-                        return true;
-                    }
-                case GameVersion.RE8_CEROZ_20210810_3:
-                    {
-                        pointerInventory = 0x0A06B7F0 + 0x1000;
-                        pointerPropsManager = 0x0A06B900 + 0x1000;
-                        pointerRankManager = 0x0A06B920 + 0x1000;
-                        pointerAddressEnemies = 0x0A06B880 + 0x1000;
-                        return true;
-                    }
-                case GameVersion.RE8_WW_20210719_2:
-                    {
-                        pointerRankManager = 0x0A05CFF8;
-                        pointerInventory = 0x0A06A5B8;
-                        pointerAddressEnemies = 0x0A0698B0;
-                        pointerPropsManager = 0x0A042F88;
-                        return true;
-                    }
-                case GameVersion.RE8_CEROD_20210719_2:
-                    {
-                        pointerRankManager = 0x0A05CFF8 + 0x2000;
-                        pointerInventory = 0x0A06A5B8 + 0x2000;
-                        pointerAddressEnemies = 0x0A0698B0 + 0x2000;
-                        pointerPropsManager = 0x0A042F88 + 0x2000;
-                        return true;
-                    }
-                case GameVersion.RE8_CEROZ_20210719_2:
-                    {
-                        pointerRankManager = 0x0A05CFF8 + 0x1000;
-                        pointerInventory = 0x0A06A5B8 + 0x1000;
-                        pointerAddressEnemies = 0x0A0698B0 + 0x1000;
-                        pointerPropsManager = 0x0A042F88 + 0x1000;
-                        return true;
-                    }
-                case GameVersion.RE8_PROMO_01_20210426_1:
-                    {
-                        pointerRankManager = 0x0A1A50C0 + 0x1030;
-                        pointerInventory = 0x0A1B29F0 + 0x1030;
-                        pointerAddressEnemies = 0x0A1B1D00 + 0x1030;
-                        pointerPropsManager = 0x0A18D990 + 0x1030;
-                        return true;
-                    }
-                case GameVersion.RE8_WW_20210506_1:
-                case GameVersion.RE8_UNK_20210710_1:
-                case GameVersion.RE8_UNK_20210714_1:
-                    {
-                        pointerRankManager = 0x0A1A50C0;
-                        pointerInventory = 0x0A1B29F0;
-                        pointerAddressEnemies = 0x0A1B1D00;
-                        pointerPropsManager = 0x0A18D990;
-                        return true;
-                    }
-                case GameVersion.RE8_CEROD_20210506_1:
-                    {
-                        pointerRankManager = 0x0A1A50C0 + 0x2000;
-                        pointerInventory = 0x0A1B29F0 + 0x2000;
-                        pointerAddressEnemies = 0x0A1B1D00 + 0x2000;
-                        pointerPropsManager = 0x0A18D990 + 0x2000;
-                        return true;
-                    }
-                case GameVersion.RE8_CEROZ_20210508_1:
-                    {
-                        pointerRankManager = 0x0A1A50C0 + 0x1000;
-                        pointerInventory = 0x0A1B1C70 + 0x1000;
-                        pointerAddressEnemies = 0x0A1B1D00 + 0x1000;
-                        pointerPropsManager = 0x0A18D990 + 0x1000;
-                        return true;
-                    }
-            }
-
-            // If we made it this far... rest in pepperonis. We have failed to detect any of the correct versions we support and have no idea what pointer addresses to use. Bail out.
-            return false;
-        }
-
         /// <summary>
         /// Dereferences a 4-byte signed integer via the PointerEnemyEntryCount pointer to detect how large the enemy pointer table is and then create the pointer table entries if required.
         /// </summary>
@@ -352,10 +442,21 @@ namespace SRTPluginProviderRE8
             IntPtr[] entityPtrArr = new IntPtr[MAX_ENTITIES];
             Buffer.BlockCopy(entityPtrByteArr, 0, entityPtrArr, 0, entityPtrByteArr.Length);
 
-            // The pointers we read are already the address of the entity, so make sure we add the first offset here
-            for (int i = 0; i < PointerEnemyEntries.Length; ++i) // Loop through and create all of the pointers for the table.
+            if (gameVersion >= GameVersion.RE8_WW_20221014_1)
             {
-                PointerEnemyEntries[i] = new MultilevelPointer(memoryAccess, IntPtr.Add(entityPtrArr[i], 0x228), 0x18, 0x48, 0x48);
+                // The pointers we read are already the address of the entity, so make sure we add the first offset here
+                for (int i = 0; i < PointerEnemyEntries.Length; ++i) // Loop through and create all of the pointers for the table.
+                {
+                    PointerEnemyEntries[i] = new MultilevelPointer(memoryAccess, IntPtr.Add(entityPtrArr[i], 0xF8), 0x68, 0x48);
+                }
+            }
+            else
+            {
+                // The pointers we read are already the address of the entity, so make sure we add the first offset here
+                for (int i = 0; i < PointerEnemyEntries.Length; ++i) // Loop through and create all of the pointers for the table.
+                {
+                    PointerEnemyEntries[i] = new MultilevelPointer(memoryAccess, IntPtr.Add(entityPtrArr[i], 0x228), 0x18, 0x48, 0x48);
+                }
             }
         }
 
