@@ -23,7 +23,8 @@ namespace SRTPluginProviderRE8
 
         // Pointer Address Variables
         private int pointerPropsManager;
-        private int pointerRankManager;
+        private int pointerRankManagerMain;
+        private int pointerRankManagerDLC1;
         private int pointerInventory;
         private int pointerAddressEnemies;
 
@@ -32,7 +33,8 @@ namespace SRTPluginProviderRE8
         private MultilevelPointer PointerPlayerStatus { get; set; }
         private MultilevelPointer PointerPlayerHP { get; set; }
         private MultilevelPointer PointerPlayerPosition { get; set; }
-        private MultilevelPointer PointerRankManager { get; set; }
+        private MultilevelPointer PointerRankManagerMain { get; set; }
+        private MultilevelPointer PointerRankManagerDLC1 { get; set; }
 
         // Enemy Pointers
         private MultilevelPointer PointerEnemyEntryList { get; set; }
@@ -161,7 +163,8 @@ namespace SRTPluginProviderRE8
                         {
                             pointerInventory = 0x0C9B7810; // app_InventoryManager *
                             pointerPropsManager = 0x0C9C4960; // app_PropsManager *
-                            pointerRankManager = 0x0C9B7958; // app_RankManager *
+                            pointerRankManagerMain = 0x0C9B7958; // app_RankManager *
+                            pointerRankManagerDLC1 = 0x0C9B7648;
                             pointerAddressEnemies = 0x0C9FC1C0; // app_MoveManager *
                             break;
                         }
@@ -201,10 +204,15 @@ namespace SRTPluginProviderRE8
                     0x50
                 );
 
-                PointerRankManager = new MultilevelPointer(
+                PointerRankManagerMain = new MultilevelPointer(
                     memoryAccess,
-                    IntPtr.Add(BaseAddress, pointerRankManager)
+                    IntPtr.Add(BaseAddress, pointerRankManagerMain)
                 );
+
+                PointerRankManagerDLC1 = new MultilevelPointer(
+                    memoryAccess,
+                    IntPtr.Add(BaseAddress, pointerRankManagerDLC1)
+                    );
 
                 PointerActiveInventory = new MultilevelPointer(
                     memoryAccess,
@@ -253,7 +261,7 @@ namespace SRTPluginProviderRE8
                         {
                             pointerInventory = 0x0A06B7F0 + 0x10F0; // app_InventoryManager
                             pointerPropsManager = 0x0A06B900 + 0x10F0; // app_PropsManager
-                            pointerRankManager = 0x0A06B920 + 0x10F0; // app_RankManager
+                            pointerRankManagerMain = 0x0A06B920 + 0x10F0; // app_RankManager
                             pointerAddressEnemies = 0x0A06B880 + 0x10F0; // app_MoveManager
                             break;
                         }
@@ -264,7 +272,7 @@ namespace SRTPluginProviderRE8
                         {
                             pointerInventory = 0x0A06B7F0; // app_InventoryManager
                             pointerPropsManager = 0x0A06B900; // app_PropsManager
-                            pointerRankManager = 0x0A06B920; // app_RankManager
+                            pointerRankManagerMain = 0x0A06B920; // app_RankManager
                             pointerAddressEnemies = 0x0A06B880; // app_MoveManager
                             break;
                         }
@@ -272,7 +280,7 @@ namespace SRTPluginProviderRE8
                         {
                             pointerInventory = 0x0A06B7F0 + 0x2000;
                             pointerPropsManager = 0x0A06B900 + 0x2000;
-                            pointerRankManager = 0x0A06B920 + 0x2000;
+                            pointerRankManagerMain = 0x0A06B920 + 0x2000;
                             pointerAddressEnemies = 0x0A06B880 + 0x2000;
                             break;
                         }
@@ -280,13 +288,13 @@ namespace SRTPluginProviderRE8
                         {
                             pointerInventory = 0x0A06B7F0 + 0x1000;
                             pointerPropsManager = 0x0A06B900 + 0x1000;
-                            pointerRankManager = 0x0A06B920 + 0x1000;
+                            pointerRankManagerMain = 0x0A06B920 + 0x1000;
                             pointerAddressEnemies = 0x0A06B880 + 0x1000;
                             break;
                         }
                     case GameVersion.RE8_WW_20210719_2:
                         {
-                            pointerRankManager = 0x0A05CFF8;
+                            pointerRankManagerMain = 0x0A05CFF8;
                             pointerInventory = 0x0A06A5B8;
                             pointerAddressEnemies = 0x0A0698B0;
                             pointerPropsManager = 0x0A042F88;
@@ -294,7 +302,7 @@ namespace SRTPluginProviderRE8
                         }
                     case GameVersion.RE8_CEROD_20210719_2:
                         {
-                            pointerRankManager = 0x0A05CFF8 + 0x2000;
+                            pointerRankManagerMain = 0x0A05CFF8 + 0x2000;
                             pointerInventory = 0x0A06A5B8 + 0x2000;
                             pointerAddressEnemies = 0x0A0698B0 + 0x2000;
                             pointerPropsManager = 0x0A042F88 + 0x2000;
@@ -302,7 +310,7 @@ namespace SRTPluginProviderRE8
                         }
                     case GameVersion.RE8_CEROZ_20210719_2:
                         {
-                            pointerRankManager = 0x0A05CFF8 + 0x1000;
+                            pointerRankManagerMain = 0x0A05CFF8 + 0x1000;
                             pointerInventory = 0x0A06A5B8 + 0x1000;
                             pointerAddressEnemies = 0x0A0698B0 + 0x1000;
                             pointerPropsManager = 0x0A042F88 + 0x1000;
@@ -310,7 +318,7 @@ namespace SRTPluginProviderRE8
                         }
                     case GameVersion.RE8_PROMO_01_20210426_1:
                         {
-                            pointerRankManager = 0x0A1A50C0 + 0x1030;
+                            pointerRankManagerMain = 0x0A1A50C0 + 0x1030;
                             pointerInventory = 0x0A1B29F0 + 0x1030;
                             pointerAddressEnemies = 0x0A1B1D00 + 0x1030;
                             pointerPropsManager = 0x0A18D990 + 0x1030;
@@ -320,7 +328,7 @@ namespace SRTPluginProviderRE8
                     case GameVersion.RE8_UNK_20210710_1:
                     case GameVersion.RE8_UNK_20210714_1:
                         {
-                            pointerRankManager = 0x0A1A50C0;
+                            pointerRankManagerMain = 0x0A1A50C0;
                             pointerInventory = 0x0A1B29F0;
                             pointerAddressEnemies = 0x0A1B1D00;
                             pointerPropsManager = 0x0A18D990;
@@ -328,7 +336,7 @@ namespace SRTPluginProviderRE8
                         }
                     case GameVersion.RE8_CEROD_20210506_1:
                         {
-                            pointerRankManager = 0x0A1A50C0 + 0x2000;
+                            pointerRankManagerMain = 0x0A1A50C0 + 0x2000;
                             pointerInventory = 0x0A1B29F0 + 0x2000;
                             pointerAddressEnemies = 0x0A1B1D00 + 0x2000;
                             pointerPropsManager = 0x0A18D990 + 0x2000;
@@ -336,7 +344,7 @@ namespace SRTPluginProviderRE8
                         }
                     case GameVersion.RE8_CEROZ_20210508_1:
                         {
-                            pointerRankManager = 0x0A1A50C0 + 0x1000;
+                            pointerRankManagerMain = 0x0A1A50C0 + 0x1000;
                             pointerInventory = 0x0A1B1C70 + 0x1000;
                             pointerAddressEnemies = 0x0A1B1D00 + 0x1000;
                             pointerPropsManager = 0x0A18D990 + 0x1000;
@@ -378,9 +386,9 @@ namespace SRTPluginProviderRE8
                     0x50
                 );
 
-                PointerRankManager = new MultilevelPointer(
+                PointerRankManagerMain = new MultilevelPointer(
                     memoryAccess,
-                    IntPtr.Add(BaseAddress, pointerRankManager)
+                    IntPtr.Add(BaseAddress, pointerRankManagerMain)
                 );
 
                 PointerActiveInventory = new MultilevelPointer(
@@ -493,7 +501,8 @@ namespace SRTPluginProviderRE8
             PointerPlayerHP.UpdatePointers();
             PointerPlayerPosition.UpdatePointers();
 
-            PointerRankManager.UpdatePointers();
+            PointerRankManagerMain.UpdatePointers();
+            PointerRankManagerDLC1.UpdatePointers();
 
             PointerEnemyEntryList.UpdatePointers();
             GenerateEnemyEntries();
@@ -514,7 +523,11 @@ namespace SRTPluginProviderRE8
             gameMemoryValues._playerPosition = PointerPlayerPosition.Deref<GamePlayerPosition>(0x180);
 
             // DA
-            GameRank gameRank = PointerRankManager.Deref<GameRank>(0x70);
+            GameRank gameRank;
+            if (PointerRankManagerDLC1.Address != IntPtr.Zero)
+                gameRank = PointerRankManagerDLC1.Deref<GameRank>(0x70);
+            else
+                gameRank = PointerRankManagerMain.Deref<GameRank>(0x70);
             gameMemoryValues._rankScore = gameRank.Score;
             gameMemoryValues._rank = gameRank.Rank;
 
