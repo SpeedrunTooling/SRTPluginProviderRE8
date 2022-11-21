@@ -155,20 +155,13 @@ namespace SRTPluginProviderRE8
 
         private void SelectPointerAddresses(int pid)
         {
-            if (gameVersion >= GameVersion.RE8_WW_20221014_1)
+            if (gameVersion == GameVersion.RE8_WW_20221014_1) // Special case, most versions are in the else statement below.
             {
-                switch (gameVersion)
-                {
-                    case GameVersion.RE8_WW_20221014_1:
-                        {
-                            pointerInventory = 0x0C9B7810; // app_InventoryManager *
-                            pointerPropsManager = 0x0C9C4960; // app_PropsManager *
-                            pointerRankManagerMain = 0x0C9B7958; // app_RankManager *
-                            pointerRankManagerDLC1 = 0x0C9B7648;
-                            pointerAddressEnemies = 0x0C9FC1C0; // app_MoveManager *
-                            break;
-                        }
-                }
+                pointerInventory = 0x0C9B7810; // app_InventoryManager
+                pointerPropsManager = 0x0C9C4960; // app_PropsManager
+                pointerRankManagerMain = 0x0C9B7958; // app_RankManager
+                pointerRankManagerDLC1 = 0x0C9B7648;
+                pointerAddressEnemies = 0x0C9FC1C0; // app_MoveManager
 
                 // Setup the pointers.
                 PointerPlayerStatus = new MultilevelPointer(
@@ -257,6 +250,15 @@ namespace SRTPluginProviderRE8
             {
                 switch (gameVersion)
                 {
+                    case GameVersion.RE8_WW_20221118_1:
+                        {
+                            pointerInventory = 0x0C9A6820; // app_InventoryManager
+                            pointerPropsManager = 0x0C9A6948; // app_PropsManager
+                            pointerRankManagerMain = 0x0C9A6968; // app_RankManager
+                            pointerAddressEnemies = 0x0C9A68B8; // app_MoveManager
+                            break;
+                        }
+
                     case GameVersion.RE8_WW_20211217_1:
                         {
                             pointerInventory = 0x0A06B7F0 + 0x10F0; // app_InventoryManager
@@ -362,17 +364,34 @@ namespace SRTPluginProviderRE8
                     0x68
                 );
 
-                PointerPlayerHP = new MultilevelPointer(
-                    memoryAccess,
-                    IntPtr.Add(BaseAddress, pointerPropsManager),
-                    0x58,
-                    0x18,
-                    0x18,
-                    0x68,
-                    0xD0,
-                    0x68,
-                    0x48
-                );
+                if (gameVersion >= GameVersion.RE8_WW_20221118_1)
+                {
+                    PointerPlayerHP = new MultilevelPointer(
+                        memoryAccess,
+                        IntPtr.Add(BaseAddress, pointerPropsManager),
+                        0x58,
+                        0x18,
+                        0x18,
+                        0x68,
+                        0xC8,
+                        0x68,
+                        0x48
+                    );
+                }
+                else
+                {
+                    PointerPlayerHP = new MultilevelPointer(
+                        memoryAccess,
+                        IntPtr.Add(BaseAddress, pointerPropsManager),
+                        0x58,
+                        0x18,
+                        0x18,
+                        0x68,
+                        0xD0,
+                        0x68,
+                        0x48
+                    );
+                }
 
                 PointerPlayerPosition = new MultilevelPointer(
                     memoryAccess,
@@ -450,7 +469,7 @@ namespace SRTPluginProviderRE8
             IntPtr[] entityPtrArr = new IntPtr[MAX_ENTITIES];
             Buffer.BlockCopy(entityPtrByteArr, 0, entityPtrArr, 0, entityPtrByteArr.Length);
 
-            if (gameVersion >= GameVersion.RE8_WW_20221014_1)
+            if (gameVersion == GameVersion.RE8_WW_20221014_1)
             {
                 // The pointers we read are already the address of the entity, so make sure we add the first offset here
                 for (int i = 0; i < PointerEnemyEntries.Length; ++i) // Loop through and create all of the pointers for the table.
@@ -502,7 +521,7 @@ namespace SRTPluginProviderRE8
             PointerPlayerPosition.UpdatePointers();
 
             PointerRankManagerMain.UpdatePointers();
-            PointerRankManagerDLC1.UpdatePointers();
+            PointerRankManagerDLC1?.UpdatePointers();
 
             PointerEnemyEntryList.UpdatePointers();
             GenerateEnemyEntries();
@@ -524,7 +543,7 @@ namespace SRTPluginProviderRE8
 
             // DA
             GameRank gameRank;
-            if (PointerRankManagerDLC1.Address != IntPtr.Zero)
+            if (PointerRankManagerDLC1 is not null && PointerRankManagerDLC1.Address != IntPtr.Zero)
                 gameRank = PointerRankManagerDLC1.Deref<GameRank>(0x70);
             else
                 gameRank = PointerRankManagerMain.Deref<GameRank>(0x70);
