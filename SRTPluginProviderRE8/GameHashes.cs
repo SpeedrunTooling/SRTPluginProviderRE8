@@ -52,6 +52,9 @@ namespace SRTPluginProviderRE8
         // Update 2022-12-01
         private static readonly byte[] re8WW_20221201_1 = new byte[32] { 0x44, 0xBC, 0xAD, 0x51, 0x36, 0x0E, 0x50, 0x35, 0x75, 0x99, 0x67, 0xE7, 0xC5, 0x62, 0x11, 0x44, 0x38, 0x20, 0xBC, 0x8B, 0xAF, 0xC4, 0x09, 0xC2, 0x55, 0x80, 0xB7, 0xFF, 0x3D, 0xB4, 0x7C, 0xDC };
 
+        // Update 2023
+        private static readonly byte[] re8WW_2023_1 = new byte[32] { 0x41, 0x1f, 0x98, 0x37, 0xff, 0x66, 0xa5, 0x74, 0xb9, 0x15, 0xb7, 0x24, 0x71, 0xf5, 0x6d, 0x90, 0x0c, 0x89, 0x1d, 0xa9, 0x0c, 0x28, 0xa4, 0xd4, 0x0e, 0xee, 0x6b, 0x7c, 0xf8, 0x5d, 0x99, 0xd8 };
+
         public static GameVersion DetectVersion(string filePath)
         {
             byte[] checksum;
@@ -141,6 +144,12 @@ namespace SRTPluginProviderRE8
             {
                 Console.WriteLine("Unknown 2021-07-14 Detected.");
                 return GameVersion.RE8_UNK_20210714_1;
+            }
+
+            else if (checksum.SequenceEqual(re8WW_2023_1))
+            {
+                Console.WriteLine("Unknown 2023 Detected.");
+                return GameVersion.RE8_WW_2023_1;
             }
 
             Console.WriteLine("Unknown Version. If you have installed any third party mods, please uninstall and try again.");
