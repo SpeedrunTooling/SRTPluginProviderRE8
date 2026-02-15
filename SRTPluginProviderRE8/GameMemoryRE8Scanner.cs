@@ -19,7 +19,7 @@ namespace SRTPluginProviderRE8
         private GameVersion gameVersion;
         public bool HasScanned;
         public bool ProcessRunning => memoryAccess != null && memoryAccess.ProcessRunning;
-        public int ProcessExitCode => (memoryAccess != null) ? memoryAccess.ProcessExitCode : 0;
+        public uint ProcessExitCode => (memoryAccess != null) ? memoryAccess.ProcessExitCode : 0;
 
         // Pointer Address Variables
         private int pointerPropsManager;
@@ -144,16 +144,16 @@ namespace SRTPluginProviderRE8
                 return; // Do not continue if this is null.
 
             int pid = GetProcessId(process).Value;
-            memoryAccess = new ProcessMemoryHandler(pid);
+            memoryAccess = new ProcessMemoryHandler((uint)pid);
             if (ProcessRunning)
             {
-                BaseAddress = NativeWrappers.GetProcessBaseAddress(pid, PInvoke.ListModules.LIST_MODULES_64BIT); // Bypass .NET's managed solution for getting this and attempt to get this info ourselves via PInvoke since some users are getting 299 PARTIAL COPY when they seemingly shouldn't.
+                BaseAddress = process?.MainModule?.BaseAddress ?? IntPtr.Zero; // Bypass .NET's managed solution for getting this and attempt to get this info ourselves via PInvoke since some users are getting 299 PARTIAL COPY when they seemingly shouldn't.
                 gameVersion = GameHashes.DetectVersion(process.MainModule.FileName);
                 SelectPointerAddresses(pid);
             }
         }
 
-        private void SelectPointerAddresses(int pid)
+        private unsafe void SelectPointerAddresses(int pid)
         {
             if (gameVersion == GameVersion.RE8_WW_20221014_1) // Special case, most versions are in the else statement below.
             {
@@ -166,7 +166,7 @@ namespace SRTPluginProviderRE8
                 // Setup the pointers.
                 PointerPlayerStatus = new MultilevelPointer(
                     memoryAccess,
-                    IntPtr.Add(BaseAddress, pointerPropsManager),
+                    (nint*)IntPtr.Add(BaseAddress, pointerPropsManager),
                     0x58,
                     0x18,
                     0x18,
@@ -175,7 +175,7 @@ namespace SRTPluginProviderRE8
 
                 PointerPlayerHP = new MultilevelPointer(
                     memoryAccess,
-                    IntPtr.Add(BaseAddress, pointerPropsManager),
+                    (nint*)IntPtr.Add(BaseAddress, pointerPropsManager),
                     0x58,
                     0x18,
                     0x18,
@@ -187,7 +187,7 @@ namespace SRTPluginProviderRE8
 
                 PointerPlayerPosition = new MultilevelPointer(
                     memoryAccess,
-                    IntPtr.Add(BaseAddress, pointerPropsManager),
+                    (nint*)IntPtr.Add(BaseAddress, pointerPropsManager),
                     0x58,
                     0x18,
                     0x18,
@@ -199,30 +199,30 @@ namespace SRTPluginProviderRE8
 
                 PointerRankManagerMain = new MultilevelPointer(
                     memoryAccess,
-                    IntPtr.Add(BaseAddress, pointerRankManagerMain)
+                    (nint*)IntPtr.Add(BaseAddress, pointerRankManagerMain)
                 );
 
                 PointerRankManagerDLC1 = new MultilevelPointer(
                     memoryAccess,
-                    IntPtr.Add(BaseAddress, pointerRankManagerDLC1)
+                    (nint*)IntPtr.Add(BaseAddress, pointerRankManagerDLC1)
                     );
 
                 PointerActiveInventory = new MultilevelPointer(
                     memoryAccess,
-                    IntPtr.Add(BaseAddress, pointerInventory),
+                    (nint*)IntPtr.Add(BaseAddress, pointerInventory),
                     0x60
                 );
 
                 PointerInventoryEntryList = new MultilevelPointer(
                     memoryAccess,
-                    IntPtr.Add(BaseAddress, pointerInventory),
+                    (nint*)IntPtr.Add(BaseAddress, pointerInventory),
                     0x60,
                     0x70
                 );
 
                 PointerEnemyEntryList = new MultilevelPointer(
                     memoryAccess,
-                    IntPtr.Add(BaseAddress, pointerAddressEnemies),
+                    (nint*)IntPtr.Add(BaseAddress, pointerAddressEnemies),
                     0x40,
                     0x78,
                     0x78,
@@ -375,7 +375,7 @@ namespace SRTPluginProviderRE8
                 // Setup the pointers.
                 PointerPlayerStatus = new MultilevelPointer(
                     memoryAccess,
-                    IntPtr.Add(BaseAddress, pointerPropsManager),
+                    (nint*)IntPtr.Add(BaseAddress, pointerPropsManager),
                     0x58,
                     0x18,
                     0x18,
@@ -386,7 +386,7 @@ namespace SRTPluginProviderRE8
                 {
                     PointerPlayerHP = new MultilevelPointer(
                         memoryAccess,
-                        IntPtr.Add(BaseAddress, pointerPropsManager),
+                        (nint*)IntPtr.Add(BaseAddress, pointerPropsManager),
                         0x58,
                         0x18,
                         0x18,
@@ -400,7 +400,7 @@ namespace SRTPluginProviderRE8
                 {
                     PointerPlayerHP = new MultilevelPointer(
                         memoryAccess,
-                        IntPtr.Add(BaseAddress, pointerPropsManager),
+                        (nint*)IntPtr.Add(BaseAddress, pointerPropsManager),
                         0x58,
                         0x18,
                         0x18,
@@ -413,7 +413,7 @@ namespace SRTPluginProviderRE8
 
                 PointerPlayerPosition = new MultilevelPointer(
                     memoryAccess,
-                    IntPtr.Add(BaseAddress, pointerPropsManager),
+                    (nint*)IntPtr.Add(BaseAddress, pointerPropsManager),
                     0x58,
                     0x18,
                     0x18,
@@ -425,18 +425,18 @@ namespace SRTPluginProviderRE8
 
                 PointerRankManagerMain = new MultilevelPointer(
                     memoryAccess,
-                    IntPtr.Add(BaseAddress, pointerRankManagerMain)
+                    (nint*)IntPtr.Add(BaseAddress, pointerRankManagerMain)
                 );
 
                 PointerActiveInventory = new MultilevelPointer(
                     memoryAccess,
-                    IntPtr.Add(BaseAddress, pointerInventory),
+                    (nint*)IntPtr.Add(BaseAddress, pointerInventory),
                     0x60
                 );
 
                 PointerInventoryEntryList = new MultilevelPointer(
                     memoryAccess,
-                    IntPtr.Add(BaseAddress, pointerInventory),
+                    (nint*)IntPtr.Add(BaseAddress, pointerInventory),
                     0x60,
                     0x18,
                     0x10
@@ -444,7 +444,7 @@ namespace SRTPluginProviderRE8
 
                 PointerEnemyEntryList = new MultilevelPointer(
                     memoryAccess,
-                    IntPtr.Add(BaseAddress, pointerAddressEnemies),
+                    (nint*)IntPtr.Add(BaseAddress, pointerAddressEnemies),
                     0x58,
                     0x10
                 );
@@ -473,15 +473,13 @@ namespace SRTPluginProviderRE8
         /// </summary>
         private unsafe void GenerateEnemyEntries()
         {
-            bool success;
-            fixed (int* p = &gameMemoryValues._enemyTableCount)
-                success = PointerEnemyEntryList.TryDerefInt(0x1C, p);
+            bool success = PointerEnemyEntryList.TryDerefInt(0x1C, ref gameMemoryValues._enemyTableCount);
 
             PointerEnemyEntries = new MultilevelPointer[MAX_ENTITIES]; // Create a new enemy pointer table array with the detected size.
 
             // Skip the first 28 bytes and read the rest as a byte array
             // This can be done because the pointers are stored sequentially in an array
-            byte[] entityPtrByteArr = PointerEnemyEntryList.DerefByteArray(0x28, MAX_ENTITIES * sizeof(IntPtr));
+            byte[] entityPtrByteArr = PointerEnemyEntryList.DerefByteArray(0x28, (nuint)(MAX_ENTITIES * sizeof(nuint)));
 
             // Do a block copy to convert the byte array to an IntPtr array
             IntPtr[] entityPtrArr = new IntPtr[MAX_ENTITIES];
@@ -492,7 +490,7 @@ namespace SRTPluginProviderRE8
                 // The pointers we read are already the address of the entity, so make sure we add the first offset here
                 for (int i = 0; i < PointerEnemyEntries.Length; ++i) // Loop through and create all of the pointers for the table.
                 {
-                    PointerEnemyEntries[i] = new MultilevelPointer(memoryAccess, IntPtr.Add(entityPtrArr[i], 0xF8), 0x68, 0x48);
+                    PointerEnemyEntries[i] = new MultilevelPointer(memoryAccess, (nint*)IntPtr.Add(entityPtrArr[i], 0xF8), 0x68, 0x48);
                 }
             }
             else
@@ -500,23 +498,21 @@ namespace SRTPluginProviderRE8
                 // The pointers we read are already the address of the entity, so make sure we add the first offset here
                 for (int i = 0; i < PointerEnemyEntries.Length; ++i) // Loop through and create all of the pointers for the table.
                 {
-                    PointerEnemyEntries[i] = new MultilevelPointer(memoryAccess, IntPtr.Add(entityPtrArr[i], 0x228), 0x18, 0x48, 0x48);
+                    PointerEnemyEntries[i] = new MultilevelPointer(memoryAccess, (nint*)IntPtr.Add(entityPtrArr[i], 0x228), 0x18, 0x48, 0x48);
                 }
             }
         }
 
         private unsafe void GenerateItemEntries()
         {
-            bool success;
-            fixed (int* p = &gameMemoryValues._playerInventoryCount)
-                success = PointerInventoryEntryList.TryDerefInt(0x1C, p);
+            bool success = PointerInventoryEntryList.TryDerefInt(0x1C, ref gameMemoryValues._playerInventoryCount);
 
             PointerInventoryEntries = new MultilevelPointer[MAX_ITEMS];
             PointerInventoryEntriesCustom = new MultilevelPointer[MAX_ITEMS];
 
             // Skip the first 28 bytes and read the rest as a byte array
             // This can be done because the pointers are stored sequentially in an array
-            byte[] inventoryEntriesPtrByteArr = PointerInventoryEntryList.DerefByteArray(0x20, MAX_ITEMS * sizeof(IntPtr));
+            byte[] inventoryEntriesPtrByteArr = PointerInventoryEntryList.DerefByteArray(0x20, (nuint)(MAX_ITEMS * sizeof(nuint)));
 
             // Do a block copy to convert the byte array to an IntPtr array
             IntPtr[] inventoryEntriesPtrArr = new IntPtr[MAX_ITEMS];
@@ -524,8 +520,8 @@ namespace SRTPluginProviderRE8
 
             for (int i = 0; i < PointerInventoryEntries.Length; ++i)
             {
-                PointerInventoryEntries[i] = new MultilevelPointer(memoryAccess, IntPtr.Add(inventoryEntriesPtrArr[i], 0x58));
-                PointerInventoryEntriesCustom[i] = new MultilevelPointer(memoryAccess, IntPtr.Add(inventoryEntriesPtrArr[i], 0x58), 0x90);
+                PointerInventoryEntries[i] = new MultilevelPointer(memoryAccess, (nint*)IntPtr.Add(inventoryEntriesPtrArr[i], 0x58));
+                PointerInventoryEntriesCustom[i] = new MultilevelPointer(memoryAccess, (nint*)IntPtr.Add(inventoryEntriesPtrArr[i], 0x58), 0x90);
             }
 
         }
@@ -722,7 +718,7 @@ namespace SRTPluginProviderRE8
             readBytes = new byte[size];
             fixed (byte* p = readBytes)
             {
-                return memoryAccess.TryGetByteArrayAt(address, size, p);
+                return memoryAccess.TryGetByteArrayAt(address.ToPointer(), (nuint)size, p);
             }
         }
 
