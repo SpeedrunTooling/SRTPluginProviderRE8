@@ -58,6 +58,9 @@ namespace SRTPluginProviderRE8
         // Update 2023-06-26
         private static readonly byte[] re8WW_20230626_1 = new byte[32] { 0x58, 0x67, 0x43, 0x22, 0x37, 0xF0, 0x4C, 0x26, 0x2F, 0xEA, 0xAF, 0x76, 0xDD, 0xE5, 0x7F, 0x50, 0x58, 0x94, 0xFE, 0x3B, 0x29, 0xD2, 0xDF, 0xA8, 0xD8, 0x78, 0xBC, 0xFF, 0x67, 0x09, 0x0C, 0x05 };
 
+        // Update 2026-02-03
+        private static readonly byte[] re8WW_20260203_1 = new byte[32] { 0xCF, 0x3E, 0xE3, 0xDF, 0xB4, 0xE0, 0x0A, 0xEC, 0x72, 0x03, 0x83, 0xC1, 0xBD, 0xFF, 0x66, 0xC8, 0x0E, 0xAB, 0x35, 0x4D, 0xAA, 0x3A, 0xAA, 0x11, 0x43, 0x2C, 0xFA, 0x47, 0x7D, 0x83, 0xAB, 0x9B };
+
         public static GameVersion DetectVersion(string filePath)
         {
             byte[] checksum;
@@ -159,6 +162,12 @@ namespace SRTPluginProviderRE8
             {
                 Console.WriteLine("Steam 2023-06-26 Detected.");
                 return GameVersion.RE8_WW_20230626_1;
+            }
+
+            else if (checksum.SequenceEqual(re8WW_20260203_1))
+            {
+                Console.WriteLine("Steam 2026-02-03 Detected.");
+                return GameVersion.RE8_WW_20260203_1;
             }
 
             Console.WriteLine("Unknown Version. If you have installed any third party mods, please uninstall and try again.");
